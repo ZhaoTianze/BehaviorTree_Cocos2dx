@@ -4,7 +4,8 @@
 --
 local Condition = class("Condition",b3.BaseNode)
 
-function Condition:onCreate(properties)
+function Condition:ctor(nodeData)
+	Condition.super.ctor(self,nodeData)
 	self.category = b3.Com.CONDITION
 end
 

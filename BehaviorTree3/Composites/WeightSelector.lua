@@ -10,11 +10,7 @@ function WeightSelector:onOpen(tick)
 end
 
 function WeightSelector:onTick(tick)
-	--优先选择上次正在执行中的节点
-	local childIndex = tick.agent:get("runningChild",tick.tree.id,self.id)
-	if childIndex then
-		return self.children[childIndex]:execute(tick)
-	end
+	--初始化权重值
 	if not self.totalWeight then
 		local totalWeight = 0
 		for i=1,#self.children do
@@ -23,23 +19,45 @@ function WeightSelector:onTick(tick)
 		end
 		self.totalWeight = totalWeight
 	end
-	local randomValue = math.random(1,self.totalWeight)
-	local currentWeight = 0
-	for i=1,#self.children do
-		local child = self.children[i]
-		currentWeight = currentWeight + child.weight
-		if currentWeight >= randomValue then
-			printf("选择节点：%d",i)
-			local status = child:execute(tick)
-			printf("status = %d", status)
-			if status == b3.Com.RUNNING then
-				printf("设置running节点")
-				tick.agent:set("runningChild",i,tick.tree.id,self.id)
+	--优先选择上次正在执行中的节点
+	local childIndex = tick.agent:get("runningChild",tick.tree.id,self.id)
+	if not childIndex then
+		-- return self.children[childIndex]:execute(tick)
+		local randomValue = math.random(1,self.totalWeight)
+		local currentWeight = 0
+		for i=1,#self.children do
+			local child = self.children[i]
+			currentWeight = currentWeight + child.weight
+			if currentWeight >= randomValue then
+				childIndex = i
+				break
 			end
+		end
+	end
+	--从childIndex开始遍历执行execute，当某一节点返回非FAILURE的时候结束遍历并返回
+	for i=childIndex,#self.children do
+		local status = self:executeChild(i,tick)
+		if status ~= b3.Com.FAILURE then
 			return status
 		end
 	end
-	return b3.Com.ERROR
+	--从1到 childIndex - 1 遍历
+	for i=1,childIndex - 1 do
+		local status = self:executeChild(i, tick)
+		if status ~= b3.Com.FAILURE then
+			return status
+		end
+	end
+	
+	return b3.Com.FAILURE
+end
+
+function WeightSelector:executeChild(index,tick)
+	local status = self.children[index]:execute(tick)
+	if status == b3.Com.RUNNING then
+		tick.agent:set("runningChild",index,tick.tree.id,self.id)
+	end
+	return status
 end
 
 return WeightSelector

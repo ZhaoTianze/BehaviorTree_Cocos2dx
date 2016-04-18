@@ -10,7 +10,7 @@ function RepeatUntilSuccess:onCreate(properties)
 end
 
 function RepeatUntilSuccess:onOpen(tick)
-	tick.agent:set("i",1,tick.tree.id,self.id)
+	tick.agent:set("i",0,tick.tree.id,self.id)
 end
 
 function RepeatUntilSuccess:onTick(tick)

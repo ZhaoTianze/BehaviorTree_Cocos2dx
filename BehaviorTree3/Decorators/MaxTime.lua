@@ -22,11 +22,12 @@ function MaxTime:onTick(tick)
 	local currTime = os.time()
 	local startTime = tick.agent:get("startTime",tick.tree.id,self.id)
 
-	local status = self.child:execute(tick)
 	if currTime - startTime > self.maxTime then
 		return b3.Com.FAILURE
 	end
 
+	local status = self.child:execute(tick)
+	
 	return status
 end
 

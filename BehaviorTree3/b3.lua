@@ -2,7 +2,7 @@
 -- Author: zen.zhao88@gmail.com
 -- Date: 2015-12-02 15:35:49
 -- BehaviorTree3 init && require lua file
-
+b3         				= {}
 b3.Com 					= require('cocos.framework.BehaviorTree3.Com')
 		
 --core		
